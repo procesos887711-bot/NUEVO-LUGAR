@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import {
-  ChevronLeft, ChevronRight, Sparkles, NotebookPen, Check, Feather, Lock
+  ChevronLeft, ChevronRight, Sparkles, NotebookPen, Check, Lock
 } from "lucide-react";
 import { APP_TITLE, APP_SUBTITLE, PARTS, AFFIRMATIONS, BONUS_QUESTIONS } from "./content.js";
 
@@ -32,9 +32,9 @@ const storage = {
    TOKENS
 --------------------------------------------------------------- */
 const TONES = {
-  moss: { accent: "#8B3FA8", accentSoft: "#EDDCF7" },   // Parte I — orquídea vibrante
-  ochre: { accent: "#C9982E", accentSoft: "#F8EACB" },  // Parte II — dorado
-  rose: { accent: "#6A3FA0", accentSoft: "#E4D9F5" },   // Parte III — violeta profundo
+  moss: { accent: "#F2795A", accentSoft: "#FDE3D9" },   // Parte I — coral cálido
+  ochre: { accent: "#E8A93D", accentSoft: "#FBEBCC" },  // Parte II — dorado
+  rose: { accent: "#6E9B6E", accentSoft: "#DEEEDC" },   // Parte III — verde salvia
 };
 
 /* ---------------------------------------------------------------
@@ -214,11 +214,37 @@ function ChecklistBlock({ chapterId, items }) {
 /* ---------------------------------------------------------------
    PANTALLAS
 --------------------------------------------------------------- */
+/* ---------------------------------------------------------------
+   ILUSTRACIÓN: árbol con raíces
+--------------------------------------------------------------- */
+function TreeIllustration() {
+  return (
+    <svg viewBox="0 0 220 200" width="168" height="152" fill="none" xmlns="http://www.w3.org/2000/svg">
+      {/* raíces */}
+      <path d="M110 118 C 95 132, 80 128, 62 148" stroke="#B98A5E" strokeWidth="5" strokeLinecap="round" />
+      <path d="M110 118 C 100 136, 100 146, 88 168" stroke="#B98A5E" strokeWidth="5" strokeLinecap="round" />
+      <path d="M110 118 C 118 138, 112 150, 118 172" stroke="#B98A5E" strokeWidth="5" strokeLinecap="round" />
+      <path d="M110 118 C 125 132, 138 130, 156 150" stroke="#B98A5E" strokeWidth="5" strokeLinecap="round" />
+      <path d="M110 118 C 105 140, 118 156, 108 176" stroke="#B98A5E" strokeWidth="4" strokeLinecap="round" opacity="0.7" />
+
+      {/* tronco */}
+      <path d="M104 122 C 100 100, 102 78, 108 58 C 112 78, 116 100, 116 122 Z" fill="#8A5A38" />
+
+      {/* copa: manchas orgánicas superpuestas en los 3 colores del tema */}
+      <circle cx="86" cy="52" r="30" fill="#F2795A" opacity="0.9" />
+      <circle cx="122" cy="40" r="26" fill="#E8A93D" opacity="0.9" />
+      <circle cx="112" cy="66" r="28" fill="#6E9B6E" opacity="0.9" />
+      <circle cx="90" cy="70" r="20" fill="#F2795A" opacity="0.55" />
+      <circle cx="130" cy="64" r="18" fill="#E8A93D" opacity="0.55" />
+    </svg>
+  );
+}
+
 function HomeScreen({ onNavigatePart, onNavigate }) {
   return (
     <div className="homeScreen">
       <div className="homeHero">
-        <Feather size={26} strokeWidth={1.4} />
+        <div className="treeWrap"><TreeIllustration /></div>
         <h1>{APP_TITLE}</h1>
         <p className="homeSubtitle">{APP_SUBTITLE}</p>
       </div>
