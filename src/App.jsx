@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback, useRef } from "react";
 import {
   ChevronLeft, ChevronRight, Sparkles, NotebookPen, Check, Lock
 } from "lucide-react";
-import { APP_TITLE, APP_SUBTITLE, PARTS, AFFIRMATIONS, BONUS_QUESTIONS } from "./content.js";
+import { APP_TITLE, APP_SUBTITLE, PARTS, AFFIRMATIONS, BONUS_QUESTIONS, ENCOURAGEMENTS, CLOSING } from "./content.js";
 
 /* ---------------------------------------------------------------
    ALMACENAMIENTO LOCAL (por navegador/dispositivo — sin backend)
@@ -219,23 +219,64 @@ function ChecklistBlock({ chapterId, items }) {
 --------------------------------------------------------------- */
 function TreeIllustration() {
   return (
-    <svg viewBox="0 0 220 200" width="168" height="152" fill="none" xmlns="http://www.w3.org/2000/svg">
-      {/* raíces */}
-      <path d="M110 118 C 95 132, 80 128, 62 148" stroke="#B98A5E" strokeWidth="5" strokeLinecap="round" />
-      <path d="M110 118 C 100 136, 100 146, 88 168" stroke="#B98A5E" strokeWidth="5" strokeLinecap="round" />
-      <path d="M110 118 C 118 138, 112 150, 118 172" stroke="#B98A5E" strokeWidth="5" strokeLinecap="round" />
-      <path d="M110 118 C 125 132, 138 130, 156 150" stroke="#B98A5E" strokeWidth="5" strokeLinecap="round" />
-      <path d="M110 118 C 105 140, 118 156, 108 176" stroke="#B98A5E" strokeWidth="4" strokeLinecap="round" opacity="0.7" />
+    <svg viewBox="0 0 240 220" width="188" height="172" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <radialGradient id="canopyShade" cx="40%" cy="30%" r="70%">
+          <stop offset="0%" stopColor="#ffffff" stopOpacity="0.25" />
+          <stop offset="100%" stopColor="#000000" stopOpacity="0" />
+        </radialGradient>
+        <linearGradient id="trunkShade" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0%" stopColor="#6E4A2E" />
+          <stop offset="45%" stopColor="#8A5A38" />
+          <stop offset="100%" stopColor="#A16F45" />
+        </linearGradient>
+      </defs>
 
-      {/* tronco */}
-      <path d="M104 122 C 100 100, 102 78, 108 58 C 112 78, 116 100, 116 122 Z" fill="#8A5A38" />
+      {/* suelo */}
+      <ellipse cx="120" cy="178" rx="92" ry="9" fill="#E9C98F" opacity="0.5" />
 
-      {/* copa: manchas orgánicas superpuestas en los 3 colores del tema */}
-      <circle cx="86" cy="52" r="30" fill="#F2795A" opacity="0.9" />
-      <circle cx="122" cy="40" r="26" fill="#E8A93D" opacity="0.9" />
-      <circle cx="112" cy="66" r="28" fill="#6E9B6E" opacity="0.9" />
-      <circle cx="90" cy="70" r="20" fill="#F2795A" opacity="0.55" />
-      <circle cx="130" cy="64" r="18" fill="#E8A93D" opacity="0.55" />
+      {/* raíces: pares que se bifurcan, con distinto grosor */}
+      <g stroke="#8A5A38" strokeLinecap="round" fill="none">
+        <path d="M112 150 C 96 160, 90 162, 74 182" strokeWidth="6" />
+        <path d="M84 176 C 78 180, 72 181, 64 190" strokeWidth="3" />
+        <path d="M112 150 C 102 164, 100 172, 94 194" strokeWidth="5" />
+        <path d="M128 150 C 138 164, 140 172, 146 194" strokeWidth="5" />
+        <path d="M128 150 C 144 160, 150 162, 166 182" strokeWidth="6" />
+        <path d="M156 176 C 162 180, 168 181, 176 190" strokeWidth="3" />
+        <path d="M120 152 C 118 168, 122 180, 118 198" strokeWidth="4" opacity="0.85" />
+      </g>
+
+      {/* tronco, con una leve curva y ramas */}
+      <path
+        d="M108 154 C 104 130, 105 108, 110 88 C 106 70, 108 56, 116 42
+           C 122 56, 122 70, 120 88 C 126 108, 128 130, 132 154 Z"
+        fill="url(#trunkShade)"
+      />
+      <path d="M112 100 C 96 92, 84 90, 70 78" stroke="#8A5A38" strokeWidth="6" strokeLinecap="round" fill="none" />
+      <path d="M126 96 C 142 86, 152 84, 168 70" stroke="#8A5A38" strokeWidth="6" strokeLinecap="round" fill="none" />
+      {/* textura de corteza */}
+      <path d="M114 140 C 113 120, 114 100, 116 84" stroke="#6E4A2E" strokeWidth="1.5" opacity="0.5" fill="none" />
+      <path d="M122 140 C 122 120, 121 100, 118 84" stroke="#6E4A2E" strokeWidth="1.5" opacity="0.4" fill="none" />
+
+      {/* copa: racimo de follaje en capas para dar volumen */}
+      <g opacity="0.95">
+        <circle cx="70" cy="72" r="19" fill="#6E9B6E" />
+        <circle cx="168" cy="64" r="18" fill="#6E9B6E" />
+        <circle cx="116" cy="36" r="26" fill="#F2795A" />
+        <circle cx="80" cy="46" r="24" fill="#E8A93D" />
+        <circle cx="150" cy="44" r="25" fill="#F2795A" />
+        <circle cx="118" cy="66" r="30" fill="#E8A93D" />
+        <circle cx="90" cy="66" r="22" fill="#6E9B6E" />
+        <circle cx="146" cy="70" r="21" fill="#6E9B6E" />
+        <circle cx="118" cy="90" r="20" fill="#F2795A" />
+      </g>
+      {/* sombreado suave encima para dar redondez */}
+      <circle cx="118" cy="60" r="66" fill="url(#canopyShade)" />
+
+      {/* motas de luz (hojas sueltas) */}
+      <circle cx="60" cy="58" r="3.5" fill="#E8A93D" />
+      <circle cx="176" cy="52" r="3" fill="#F2795A" />
+      <circle cx="130" cy="18" r="3" fill="#6E9B6E" />
     </svg>
   );
 }
@@ -316,6 +357,10 @@ function PartScreen({ part, onOpenChapter, onBack }) {
 
 function ChapterScreen({ part, chapter, index, total, onPrev, onNext, onBack }) {
   const tone = TONES[part.tone];
+  const encIndex = (parseInt((chapter.id.match(/\d+/) || ["0"])[0], 10)) % ENCOURAGEMENTS.length;
+  const encouragement = ENCOURAGEMENTS[encIndex];
+  const isFinalChapter = part.num === "III" && index === total - 1;
+
   return (
     <div className="chapterScreen" style={{ "--accent": tone.accent, "--accentSoft": tone.accentSoft }}>
       <button className="backLink" onClick={onBack}><ChevronLeft size={16} /> {part.title}</button>
@@ -333,6 +378,16 @@ function ChapterScreen({ part, chapter, index, total, onPrev, onNext, onBack }) 
                 <PromptField storageKey={`ans:${chapter.id}:${i}`} question={pr} />
               </div>
             ))}
+          </div>
+        )}
+        <div className="encouragementNote">
+          <Sparkles size={14} />
+          <p>{encouragement}</p>
+        </div>
+        {isFinalChapter && (
+          <div className="closingBlock">
+            <h3>{CLOSING.heading}</h3>
+            {CLOSING.paragraphs.map((p, i) => <p key={i} className="pageParagraph">{p}</p>)}
           </div>
         )}
       </article>
