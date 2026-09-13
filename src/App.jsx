@@ -1,589 +1,305 @@
-import React, { useState, useEffect, useCallback, useRef } from "react";
-import {
-  ChevronLeft, ChevronRight, Sparkles, NotebookPen, Check, Lock
-} from "lucide-react";
-import { APP_TITLE, APP_SUBTITLE, PARTS, AFFIRMATIONS, BONUS_QUESTIONS, ENCOURAGEMENTS, CLOSING } from "./content.js";
+// Contenido de la app — mismo material que probaste en el artifact
 
-/* ---------------------------------------------------------------
-   ALMACENAMIENTO LOCAL (por navegador/dispositivo — sin backend)
---------------------------------------------------------------- */
-const STORAGE_PREFIX = "etl:"; // "encuentra tu lugar"
+const APP_TITLE = "Encuentra tu Lugar";
+const APP_SUBTITLE = "Constelaciones familiares para el amor y el dinero";
 
-const storage = {
-  async get(key) {
-    try {
-      const v = localStorage.getItem(STORAGE_PREFIX + key);
-      return v === null ? null : { key, value: v };
-    } catch (e) {
-      return null;
-    }
+const PARTS = [
+  {
+    id: "p1",
+    num: "I",
+    title: "Encuentra tu Lugar en el Amor",
+    tone: "moss",
+    chapters: [
+      {
+        id: "c1",
+        heading: "El mapa invisible: los órdenes del amor",
+        paragraphs: [
+          "¿Alguna vez sentiste que, sin importar cuánto te esfuerces, algo en el amor simplemente no te sale? No es casualidad ni mala suerte. Bert Hellinger, después de acompañar a miles de familias, se dio cuenta de que todas seguimos unas reglas invisibles que aprendimos en casa mucho antes de tener nuestra primera pareja. Él las llamó los \"órdenes del amor\".",
+          "Son tres ideas sencillas, aunque no siempre fáciles de ver: todos merecemos tener un lugar en la familia —incluso quienes fueron dejados de lado o de quienes ya nadie habla—; quien llegó primero a la familia tiene un lugar distinto al de quien llegó después; y en toda relación sana, dar y recibir se van equilibrando con el tiempo.",
+          "Cuando alguna de estas tres cosas se rompió en tu familia, algo curioso pasa: quienes vienen después —a veces tú misma, sin saberlo— terminan cargando con ese desequilibrio, como si el corazón intentara arreglar algo que ni siquiera te tocó vivir a ti."
+        ]
+      },
+      {
+        id: "c2",
+        heading: "Los vínculos que compiten con el amor de pareja",
+        paragraphs: [
+          "¿Te ha pasado que justo cuando una relación empieza a ponerse seria, algo dentro de ti se echa para atrás? O que sigues, una y otra vez, enamorándote de personas que no terminan de estar ahí del todo. No es que no sepas amar: puede que una parte de tu corazón esté ocupada cuidando de otra historia, una que no es tuya.",
+          "A veces esa historia tiene nombre y apellido, aunque tú no lo sepas todavía: un hermano o hermana que no llegó a nacer, un hijo dado en adopción, una expareja de tus padres de la que en casa nunca se habló. Cuando alguien de la familia queda \"afuera\" del relato, sin querer le guardamos un huequito en el corazón — y a veces ese huequito ocupa el lugar que le tocaría a tu propio amor."
+        ],
+        prompts: [
+          "¿Hay alguna historia de amor silenciada en mi familia (de mi madre, mi padre, una abuela)?",
+          "¿Sé, o intuyo, algo sobre una persona excluida de mi historia familiar?"
+        ]
+      },
+      {
+        id: "c3",
+        heading: "El lugar que no ocupo",
+        paragraphs: [
+          "Hay una frase que se usa en constelaciones: \"no hay lugar para mí\". Esta sensación aparece en personas que sienten que, aunque hagan todo bien, el amor de pareja parece reservado para otras.",
+          "El lugar en el amor de pareja se construye primero como un lugar interno: la certeza silenciosa de \"yo pertenezco, tengo derecho a estar aquí\"."
+        ],
+        prompts: ["¿Cómo fue recibida tu llegada al mundo, según lo que sabes de tu historia familiar?"]
+      },
+      {
+        id: "c4",
+        heading: "Patrones que se repiten",
+        paragraphs: [
+          "Si una figura significativa del linaje vivió una historia de amor no correspondido o de soledad, es posible que ese patrón busque \"continuarse\" en quienes vienen después, como una forma inconsciente de decir: \"yo también llevo tu historia\".",
+          "Mientras el patrón permanece invisible, tiene más fuerza. Cuando se nombra y se honra el lugar de quien lo vivió antes, deja de necesitar repetirse a través de ti."
+        ],
+        prompts: ["¿Hay una edad en la que las mujeres (o los hombres) de tu familia \"se quedaron solas\"? ¿Coincide con algo tuyo?"]
+      },
+      {
+        id: "c5",
+        heading: "Del enredo a la libertad",
+        paragraphs: [
+          "En el trabajo de constelaciones se usan frases sanadoras: palabras que, dichas con presencia, ayudan a reconocer lo negado y soltar lealtades que ya no corresponden.",
+          "Hacia una persona excluida: \"Te doy un lugar en mi corazón. Ahora yo sigo mi camino, y tú el tuyo\". Hacia el propio sistema: \"Tengo derecho a estar aquí, y a amar y ser amada plenamente\"."
+        ]
+      },
+      {
+        id: "c6",
+        heading: "Ejercicio guiado: mi propia constelación en papel",
+        paragraphs: [
+          "Coloca un objeto que te represente en el centro de un espacio. Añade objetos para tu madre y tu padre donde \"sientas\" que van. Si sabes de alguien excluido, dale también un lugar, aunque sea en un extremo.",
+          "Quédate en silencio observando el conjunto. Nota qué sientes. Cierra agradeciendo a cada objeto representado."
+        ],
+        prompts: ["¿Qué imagen, sensación o pensamiento surgió al hacer este ejercicio?"]
+      },
+      {
+        id: "c7",
+        heading: "Autoevaluación: señales de un posible enredo",
+        paragraphs: ["Marca las que reconozcas en tu historia. No es un diagnóstico: es una herramienta de observación."],
+        checklist: [
+          "Aunque haga todo \"bien\", la relación se enfría sin razón clara.",
+          "Me atraen personas emocionalmente no disponibles.",
+          "Hay una historia de amor silenciada en mi familia.",
+          "Siento culpa difusa cuando el amor me va bien.",
+          "Repito el mismo patrón de abandono con distintas parejas.",
+          "En mi familia hay alguien de quien casi no se habla."
+        ]
+      }
+    ]
   },
-  async set(key, value) {
-    try {
-      localStorage.setItem(STORAGE_PREFIX + key, value);
-      return { key, value };
-    } catch (e) {
-      return null;
-    }
+  {
+    id: "p2",
+    num: "II",
+    title: "Aprende a Recibir",
+    tone: "ochre",
+    epigraph: "El dinero que recibimos es, en el fondo, una forma de \u201cbuen dar\u201d que aprendimos primero con nuestros padres. Cuando no logramos recibir plenamente de ellos, ese mismo bloqueo para recibir se traslada después a otras áreas de la vida \u2014 incluido el dinero.",
+    epigraphNote: "Idea inspirada en la obra de Bert Hellinger sobre el dinero y el buen dar (no es una cita textual).",
+    chapters: [
+      {
+        id: "c8",
+        heading: "El dinero como energía del sistema familiar",
+        paragraphs: [
+          "El dinero no es solo un recurso material: es también símbolo de intercambio y pertenencia. La forma en que tu familia se relacionó con la abundancia, la escasez o la deuda se transmite de generación en generación.",
+          "Por eso, cuando una pareja piensa \"si tuviéramos más dinero esto se solucionaría\", el malestar de fondo suele permanecer incluso si el dinero llega."
+        ],
+        prompts: ["Para mí, el dinero en mi relación representa sobre todo…"]
+      },
+      {
+        id: "c9",
+        heading: "Dar y recibir: el equilibrio que sostiene toda relación",
+        paragraphs: [
+          "Toda relación sana necesita un flujo continuo entre dar y recibir. Cuando el dinero se vuelve el único canal de este intercambio, el vínculo puede desequilibrarse incluso en medio de la abundancia material.",
+          "Quien solo da dinero, sin dar o recibir en otros planos, tiende a sentirse solo. Quien solo recibe dinero, sin poder corresponder de otras formas, tiende a sentir culpa."
+        ],
+        prompts: ["¿En qué formas, más allá del dinero, doy y recibo en mi relación?"]
+      },
+      {
+        id: "c10",
+        heading: "La herencia invisible",
+        paragraphs: [
+          "Antes de tu primera cuenta bancaria ya habías aprendido, observando en casa, creencias sobre el dinero que probablemente sigues repitiendo sin cuestionar."
+        ],
+        prompts: [
+          "¿Qué frase sobre el dinero escuchabas repetir en tu casa de niña?",
+          "¿Cómo te sientes hoy cuando ganas más que tu pareja? ¿Y cuándo ganas menos?"
+        ]
+      },
+      {
+        id: "c11",
+        heading: "Cuando el dinero sustituye al amor",
+        paragraphs: [
+          "En algunos sistemas familiares, el dinero se convirtió en la principal forma de expresar amor o disculpa: un regalo en lugar de una conversación pendiente, pagar una salida en lugar de estar presente.",
+          "Reconocer esta dinámica, sin culpa, es el primer paso para abrir otros canales de intercambio: la palabra, el tiempo, la vulnerabilidad compartida."
+        ]
+      },
+      {
+        id: "c12",
+        heading: "Autoevaluación: ¿el dinero sustituye al amor?",
+        paragraphs: ["Como antes, esta lista es solo una herramienta de observación personal."],
+        checklist: [
+          "Resuelvo los conflictos con un regalo o una compra, en vez de conversar.",
+          "Mi valor en la relación depende de cuánto aporto económicamente.",
+          "Me cuesta pedir ayuda económica sin sentir que pierdo valor.",
+          "El dinero era un tema tenso en mi familia de origen.",
+          "\"Proveer\" es mi principal forma de mostrar amor.",
+          "Rara vez hablamos abiertamente de dinero en pareja."
+        ]
+      },
+      {
+        id: "c13",
+        heading: "Ejercicio guiado: reescribiendo mi relación con el dinero",
+        paragraphs: [
+          "Identifica una forma de \"dar\" que no involucre dinero (tiempo de calidad, una carta, ayuda concreta, escucha sin distracciones) y practícala esta semana."
+        ],
+        prompts: ["Reconozco lo que mi pareja (o yo misma) aporta más allá del dinero:"]
+      }
+    ]
   },
+  {
+    id: "p3",
+    num: "III",
+    title: "Suelta lo que No Es Tuyo",
+    tone: "rose",
+    chapters: [
+      {
+        id: "c14",
+        heading: "¿Por qué repito lo que no quiero repetir?",
+        paragraphs: [
+          "Un patrón no siempre es evidente. Muchas veces lo reconocemos solo después de haberlo repetido varias veces, y pensamos: \"¿cómo he vuelto a terminar aquí?\".",
+          "La familia es uno de los primeros lugares donde aprendemos sobre el amor, la pertenencia, los límites y el conflicto. Esto no determina tu futuro: forma parte de cómo interpretas el mundo."
+        ],
+        prompts: [
+          "En mis relaciones de pareja suelo repetir…",
+          "Cuando intento poner límites, siento…",
+          "Un patrón que me gustaría comprender mejor es…"
+        ]
+      },
+      {
+        id: "c15",
+        heading: "Tu familia también forma parte de tu historia",
+        paragraphs: [
+          "Antes de tomar tus propias decisiones, viviste dentro de una familia con reglas y formas de relacionarse. Algunas se dijeron en voz alta; otras se aprendieron solo observando.",
+          "Pertenecer es una necesidad humana profunda. A veces existe tensión entre \"quiero ser yo misma\" y \"quiero seguir perteneciendo\"."
+        ],
+        prompts: [
+          "¿Hay historias que se repiten en mi familia?",
+          "¿Hay personas de las que apenas se habla?"
+        ]
+      },
+      {
+        id: "c16",
+        heading: "Lealtades familiares",
+        paragraphs: [
+          "Ser leal significa querer y respetar. Pero conviene preguntarse: ¿estoy eligiendo esto libremente, o siento que tengo que hacerlo para pertenecer?",
+          "Una regla familiar no dicha puede seguir operando en ti aunque ya no te represente."
+        ],
+        prompts: [
+          "En mi familia era importante…",
+          "¿Existe alguna regla familiar que sigo cumpliendo aunque ya no me represente?"
+        ]
+      },
+      {
+        id: "c17",
+        heading: "Ocupar tu propio lugar",
+        paragraphs: [
+          "En muchas familias aparecen roles: quien cuida, quien organiza, quien media. El problema aparece cuando permanecemos atrapadas en ellos incluso cuando ya no son necesarios."
+        ],
+        prompts: [
+          "Lo que suelo intentar solucionar aunque no me corresponda es…",
+          "Cuando alguien de mi familia está mal, yo siento que debo…"
+        ]
+      },
+      {
+        id: "c18",
+        heading: "Culpa, límites y libertad",
+        paragraphs: [
+          "Sentir culpa al poner un límite no significa que estés haciendo algo incorrecto: a veces significa, simplemente, que estás haciendo algo nuevo."
+        ],
+        prompts: [
+          "Hay una persona con la que necesito establecer un límite:",
+          "Un límite saludable que podría empezar a construir es:"
+        ]
+      },
+      {
+        id: "c19",
+        heading: "Mirar tu historia sin quedarte atrapada en ella",
+        paragraphs: [
+          "Puedes decir \"esto ocurrió en mi familia\" sin tener que decir \"por eso yo siempre seré así\". La historia familiar es una parte de tu vida, no toda tu vida."
+        ],
+        prompts: [
+          "De mi historia familiar quiero conservar:",
+          "Algo que quiero dejar de repetir:"
+        ]
+      },
+      {
+        id: "c20",
+        heading: "Tu nueva mirada",
+        paragraphs: [
+          "En lugar de \"¿qué me pasa?\", puedes preguntarte \"¿qué estoy repitiendo?\". Y quizá la pregunta más importante: \"¿qué quiero elegir yo?\"."
+        ],
+        prompts: [
+          "Agradezco haber recibido…",
+          "A partir de ahora quiero elegir…",
+          "La persona que quiero ser es…"
+        ]
+      }
+    ]
+  }
+];
+
+const AFFIRMATIONS = {
+  love: [
+    "Tengo un lugar en el amor, tal y como soy.",
+    "Honro la historia de mi familia y sigo mi propio camino.",
+    "Puedo amar y ser amada plenamente sin traicionar a nadie de mi linaje.",
+    "Suelto lo que no me pertenece y tomo lo que sí es mío.",
+    "Merezco una relación presente, recíproca y real.",
+    "Mi corazón está disponible para un amor que me elige."
+  ],
+  money: [
+    "El dinero y el amor son dos formas distintas de intercambio.",
+    "Puedo dar y recibir en muchas formas, no solo en dinero.",
+    "Mi valor no depende de cuánto aporto económicamente.",
+    "Elijo qué conservar y qué dejar ir de lo que aprendí sobre el dinero.",
+    "Puedo hablar de dinero con calma, no desde el miedo.",
+    "La abundancia material y la conexión emocional pueden crecer juntas."
+  ]
 };
 
-/* ---------------------------------------------------------------
-   TOKENS
---------------------------------------------------------------- */
-const TONES = {
-  moss: { accent: "#F2795A", accentSoft: "#FDE3D9" },   // Parte I — coral cálido
-  ochre: { accent: "#E8A93D", accentSoft: "#FBEBCC" },  // Parte II — dorado
-  rose: { accent: "#6E9B6E", accentSoft: "#DEEEDC" },   // Parte III — verde salvia
+const BONUS_QUESTIONS = [
+  "¿Qué patrón se repite en mi vida?", "¿Qué historias familiares conozco?",
+  "¿Qué historias familiares desconozco?", "¿Qué era importante en mi familia?",
+  "¿Qué estaba mal visto?", "¿Cómo se expresaba el amor?",
+  "¿Cómo se expresaba el enfado?", "¿Cómo se resolvían los conflictos?",
+  "¿Qué aprendí sobre el dinero?", "¿Qué aprendí sobre el éxito?",
+  "¿Qué aprendí sobre el fracaso?", "¿Qué aprendí sobre el sacrificio?",
+  "¿Qué aprendí sobre el amor?", "¿Qué significa para mí pertenecer?",
+  "¿Qué temo perder si cambio?", "¿Dónde siento más culpa?",
+  "¿Dónde me cuesta poner límites?", "¿Qué papel suelo desempeñar en mi familia?",
+  "¿Qué responsabilidades tiendo a asumir?", "¿Qué intento solucionar que quizá no me corresponde?",
+  "¿Qué patrón aparece en mis relaciones?", "¿Qué personas tiendo a elegir?",
+  "¿Qué necesito recibir y me cuesta pedir?", "¿Qué necesito aprender a darme?",
+  "¿Qué parte de mi historia quiero comprender mejor?", "¿Qué quiero conservar de mi familia?",
+  "¿Qué quiero hacer diferente?", "¿Qué significa para mí vivir mi propia vida?",
+  "¿Qué elegiría si no tuviera miedo de decepcionar a nadie?",
+  "¿Cómo quiero escribir mi propia historia a partir de ahora?"
+];
+
+const ENCOURAGEMENTS = [
+  "Estás dedicando tiempo a mirar tu propia historia. Eso, por sencillo que parezca, ya es un acto de valentía.",
+  "No hace falta que resuelvas todo hoy. Cada vez que vuelves aquí, algo se acomoda un poco, aunque no lo notes de inmediato.",
+  "Lo que acabas de leer puede sentarse contigo unos días. No hay prisa: tu proceso no se mide en capítulos por semana.",
+  "Si esto removió algo incómodo, es una buena señal: significa que tocaste algo real, no que hiciste algo mal.",
+  "Volver a este espacio, aunque sea cinco minutos, ya cuenta. La constancia pequeña sostiene más que el esfuerzo intenso y esporádico.",
+  "Estás construyendo una relación distinta con tu propia historia, una lectura a la vez. Eso no se deshace fácilmente.",
+  "Puedes cerrar la app ahora mismo y sentirte orgullosa de haber llegado hasta aquí hoy.",
+  "Nadie más está viendo esto. Es tuyo, a tu ritmo, sin nadie esperando que 'ya deberías haber avanzado más'.",
+  "Cada palabra que escribiste hoy es un paso que tu yo de hace un año no sabía que podía dar.",
+  "Esto no es una carrera hacia una versión 'arreglada' de ti. Es un acompañamiento mientras te conoces mejor."
+];
+
+const CLOSING = {
+  heading: "Has llegado hasta aquí",
+  paragraphs: [
+    "No fue poca cosa. Leíste, escribiste, te detuviste en preguntas que muchas personas evitan toda su vida. Eso ya cambió algo, aunque los resultados no se vean de inmediato.",
+    "Este cuaderno no se termina hoy: puedes volver cuando quieras, releer un capítulo que te movió algo, completar una pregunta que dejaste a medias, o simplemente escribir en tus notas libres cuando algo de tu día se conecte con algo de aquí.",
+    "Las 30 preguntas te esperan para los días en que quieras seguir mirando hacia adentro sin necesidad de releer todo. Y las afirmaciones, para los días en que solo necesites un recordatorio amable.",
+    "Gracias por confiar en este proceso y en ti misma para sostenerlo. Eso es, quizás, el primer paso que ya nadie te puede quitar."
+  ]
 };
 
-/* ---------------------------------------------------------------
-   HOOK DE RESPUESTA (con autoguardado)
---------------------------------------------------------------- */
-function useAnswer(key) {
-  const [value, setValue] = useState("");
-  const [saved, setSaved] = useState(true);
-  const timerRef = useRef(null);
-
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      const res = await storage.get(key);
-      if (!cancelled) setValue(res ? res.value : "");
-    })();
-    return () => { cancelled = true; };
-  }, [key]);
-
-  const onChange = useCallback((text) => {
-    setValue(text);
-    setSaved(false);
-    if (timerRef.current) clearTimeout(timerRef.current);
-    timerRef.current = setTimeout(async () => {
-      await storage.set(key, text);
-      setSaved(true);
-    }, 400);
-  }, [key]);
-
-  return [value, onChange, saved];
-}
-
-/* ---------------------------------------------------------------
-   REFLEXIÓN CON IA (vía backend propio, /api/reflect)
---------------------------------------------------------------- */
-async function requestReflection(question, text) {
-  const response = await fetch("/api/reflect", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ question, text }),
-  });
-  let data;
-  try {
-    data = await response.json();
-  } catch (e) {
-    throw new Error("La respuesta del servidor no se pudo leer.");
-  }
-  if (!response.ok) {
-    throw new Error(data?.error || `Error HTTP ${response.status}`);
-  }
-  if (!data.reflection) {
-    throw new Error("La respuesta llegó vacía.");
-  }
-  return data.reflection;
-}
-
-const REFLECTIONS_ENABLED = import.meta.env.VITE_ENABLE_REFLECTIONS === "true";
-
-function PromptField({ storageKey, question, placeholder }) {
-  const [value, onChange, saved] = useAnswer(storageKey);
-  const [reflection, setReflection] = useState("");
-  const [status, setStatus] = useState("idle");
-  const [errorDetail, setErrorDetail] = useState("");
-  const [cooldown, setCooldown] = useState(false);
-
-  const getReflection = async () => {
-    if (!value || value.trim().length < 6 || cooldown) return;
-    setStatus("loading");
-    setReflection("");
-    setErrorDetail("");
-    try {
-      const text = await requestReflection(question, value.trim());
-      setReflection(text);
-      setStatus("idle");
-    } catch (e) {
-      setStatus("error");
-      const raw = e && e.message ? e.message : "";
-      if (/rate limit/i.test(raw)) {
-        setErrorDetail("estás pidiendo reflexiones muy rápido — espera un minuto");
-        setCooldown(true);
-        setTimeout(() => setCooldown(false), 20000);
-      } else {
-        setErrorDetail(raw || "error desconocido");
-      }
-    }
-  };
-
-  return (
-    <div className="promptField">
-      <textarea
-        className="promptTextarea"
-        value={value}
-        placeholder={placeholder || "Escribe aquí…"}
-        onChange={(e) => onChange(e.target.value)}
-        rows={3}
-      />
-      <span className={"savedTag" + (saved ? " on" : "")}>{saved ? "Guardado" : "Guardando…"}</span>
-      {REFLECTIONS_ENABLED && (
-        <>
-          <div className="reflectionRow">
-            <button
-              className="reflectionBtn"
-              type="button"
-              onClick={getReflection}
-              disabled={status === "loading" || cooldown || !value || value.trim().length < 6}
-            >
-              <Sparkles size={13} />
-              {status === "loading" ? "Pensando…" : cooldown ? "Espera un momento…" : "Recibir una reflexión"}
-            </button>
-          </div>
-          {status === "error" && (
-            <span className="reflectionError">No se pudo generar la reflexión: {errorDetail}. Intenta de nuevo.</span>
-          )}
-          {reflection && (
-            <div className="reflectionCard"><p>{reflection}</p></div>
-          )}
-        </>
-      )}
-    </div>
-  );
-}
-
-/* ---------------------------------------------------------------
-   CHECKLIST CON RESUMEN
---------------------------------------------------------------- */
-function checklistMessage(count, total) {
-  const ratio = count / total;
-  if (count === 0) return "Todavía no marcaste ninguna. También es información: quizás esta parte no es la que más resuena contigo ahora mismo.";
-  if (ratio <= 0.35) return "Reconoces alguna de estas señales. No es un diagnóstico — es una invitación suave a seguir observando.";
-  if (ratio <= 0.7) return "Reconoces varias de estas señales en tu historia. Puede valer la pena que dediques tiempo a los ejercicios de esta parte.";
-  return "Reconoces la mayoría de estas señales. Esto no define quién eres, pero sí puede ser un buen punto de partida para profundizar con calma en los ejercicios de esta parte.";
-}
-
-function ChecklistBlock({ chapterId, items }) {
-  const [checked, setChecked] = useState(() => items.map(() => false));
-  const [loaded, setLoaded] = useState(false);
-
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      const results = await Promise.all(items.map(async (_, i) => {
-        const res = await storage.get(`chk:${chapterId}:${i}`);
-        return res ? res.value === "yes" : false;
-      }));
-      if (!cancelled) { setChecked(results); setLoaded(true); }
-    })();
-    return () => { cancelled = true; };
-  }, [chapterId]);
-
-  const toggle = async (i) => {
-    const next = [...checked];
-    next[i] = !next[i];
-    setChecked(next);
-    await storage.set(`chk:${chapterId}:${i}`, next[i] ? "yes" : "");
-  };
-
-  const count = checked.filter(Boolean).length;
-
-  return (
-    <div className="checklistBlock">
-      {items.map((label, i) => (
-        <button key={i} className={"checkItem" + (checked[i] ? " checked" : "")} onClick={() => toggle(i)} type="button">
-          <span className="checkBox">{checked[i] && <Check size={13} strokeWidth={3} />}</span>
-          <span>{label}</span>
-        </button>
-      ))}
-      {loaded && count > 0 && (
-        <div className="checklistSummary">
-          <span className="checklistCount">{count} de {items.length}</span>
-          <p>{checklistMessage(count, items.length)}</p>
-        </div>
-      )}
-    </div>
-  );
-}
-
-/* ---------------------------------------------------------------
-   PANTALLAS
---------------------------------------------------------------- */
-/* ---------------------------------------------------------------
-   ILUSTRACIÓN: árbol con raíces
---------------------------------------------------------------- */
-function TreeIllustration() {
-  return (
-    <svg viewBox="0 0 240 220" width="188" height="172" xmlns="http://www.w3.org/2000/svg">
-      <defs>
-        <radialGradient id="canopyShade" cx="40%" cy="30%" r="70%">
-          <stop offset="0%" stopColor="#ffffff" stopOpacity="0.25" />
-          <stop offset="100%" stopColor="#000000" stopOpacity="0" />
-        </radialGradient>
-        <linearGradient id="trunkShade" x1="0" y1="0" x2="1" y2="0">
-          <stop offset="0%" stopColor="#6E4A2E" />
-          <stop offset="45%" stopColor="#8A5A38" />
-          <stop offset="100%" stopColor="#A16F45" />
-        </linearGradient>
-      </defs>
-
-      {/* suelo */}
-      <ellipse cx="120" cy="178" rx="92" ry="9" fill="#E9C98F" opacity="0.5" />
-
-      {/* raíces: pares que se bifurcan, con distinto grosor */}
-      <g stroke="#8A5A38" strokeLinecap="round" fill="none">
-        <path d="M112 150 C 96 160, 90 162, 74 182" strokeWidth="6" />
-        <path d="M84 176 C 78 180, 72 181, 64 190" strokeWidth="3" />
-        <path d="M112 150 C 102 164, 100 172, 94 194" strokeWidth="5" />
-        <path d="M128 150 C 138 164, 140 172, 146 194" strokeWidth="5" />
-        <path d="M128 150 C 144 160, 150 162, 166 182" strokeWidth="6" />
-        <path d="M156 176 C 162 180, 168 181, 176 190" strokeWidth="3" />
-        <path d="M120 152 C 118 168, 122 180, 118 198" strokeWidth="4" opacity="0.85" />
-      </g>
-
-      {/* tronco, con una leve curva y ramas */}
-      <path
-        d="M108 154 C 104 130, 105 108, 110 88 C 106 70, 108 56, 116 42
-           C 122 56, 122 70, 120 88 C 126 108, 128 130, 132 154 Z"
-        fill="url(#trunkShade)"
-      />
-      <path d="M112 100 C 96 92, 84 90, 70 78" stroke="#8A5A38" strokeWidth="6" strokeLinecap="round" fill="none" />
-      <path d="M126 96 C 142 86, 152 84, 168 70" stroke="#8A5A38" strokeWidth="6" strokeLinecap="round" fill="none" />
-      {/* textura de corteza */}
-      <path d="M114 140 C 113 120, 114 100, 116 84" stroke="#6E4A2E" strokeWidth="1.5" opacity="0.5" fill="none" />
-      <path d="M122 140 C 122 120, 121 100, 118 84" stroke="#6E4A2E" strokeWidth="1.5" opacity="0.4" fill="none" />
-
-      {/* copa: racimo de follaje en capas para dar volumen */}
-      <g opacity="0.95">
-        <circle cx="70" cy="72" r="19" fill="#6E9B6E" />
-        <circle cx="168" cy="64" r="18" fill="#6E9B6E" />
-        <circle cx="116" cy="36" r="26" fill="#F2795A" />
-        <circle cx="80" cy="46" r="24" fill="#E8A93D" />
-        <circle cx="150" cy="44" r="25" fill="#F2795A" />
-        <circle cx="118" cy="66" r="30" fill="#E8A93D" />
-        <circle cx="90" cy="66" r="22" fill="#6E9B6E" />
-        <circle cx="146" cy="70" r="21" fill="#6E9B6E" />
-        <circle cx="118" cy="90" r="20" fill="#F2795A" />
-      </g>
-      {/* sombreado suave encima para dar redondez */}
-      <circle cx="118" cy="60" r="66" fill="url(#canopyShade)" />
-
-      {/* motas de luz (hojas sueltas) */}
-      <circle cx="60" cy="58" r="3.5" fill="#E8A93D" />
-      <circle cx="176" cy="52" r="3" fill="#F2795A" />
-      <circle cx="130" cy="18" r="3" fill="#6E9B6E" />
-    </svg>
-  );
-}
-
-function HomeScreen({ onNavigatePart, onNavigate }) {
-  return (
-    <div className="homeScreen">
-      <div className="homeHero">
-        <div className="treeWrap"><TreeIllustration /></div>
-        <h1>{APP_TITLE}</h1>
-        <p className="homeSubtitle">{APP_SUBTITLE}</p>
-      </div>
-      <p className="homeIntro">
-        Cambias de pareja, pero la historia parece repetirse. Ganas más dinero, pero la relación no mejora.
-        Este cuaderno te acompaña a mirar esas repeticiones desde el enfoque de las constelaciones familiares —
-        con lecturas breves y ejercicios para escribir directamente aquí.
-      </p>
-      <div className="trustNote">
-        <span>Todo lo que escribas se guarda solo en este navegador — nadie más puede verlo. Puedes ir a tu ritmo.</span>
-      </div>
-      <div className="homeParts">
-        {PARTS.map((part, i) => (
-          <button key={part.id} className="homePartCard" style={{ "--accent": TONES[part.tone].accent, "--accentSoft": TONES[part.tone].accentSoft }} onClick={() => onNavigatePart(i)}>
-            <span className="homePartNum">{part.num}</span>
-            <span className="homePartTitle">{part.title}</span>
-            <ChevronRight size={18} />
-          </button>
-        ))}
-        <button className="homePartCard alt" onClick={() => onNavigate("affirmations")}>
-          <Sparkles size={18} />
-          <span className="homePartTitle">Afirmaciones</span>
-          <ChevronRight size={18} />
-        </button>
-        <button className="homePartCard alt" onClick={() => onNavigate("bonus")}>
-          <span className="homePartNum">30</span>
-          <span className="homePartTitle">Preguntas para 30 días</span>
-          <ChevronRight size={18} />
-        </button>
-        <button className="homePartCard alt" onClick={() => onNavigate("notes")}>
-          <NotebookPen size={18} />
-          <span className="homePartTitle">Mis notas libres</span>
-          <ChevronRight size={18} />
-        </button>
-      </div>
-    </div>
-  );
-}
-
-function PartScreen({ part, onOpenChapter, onBack }) {
-  const tone = TONES[part.tone];
-  return (
-    <div className="partScreen" style={{ "--accent": tone.accent, "--accentSoft": tone.accentSoft }}>
-      <button className="backLink" onClick={onBack}><ChevronLeft size={16} /> Inicio</button>
-      <div className="partHeader">
-        <span className="partEyebrow">Parte {part.num}</span>
-        <h2>{part.title}</h2>
-      </div>
-      {part.epigraph && (
-        <div className="epigraph">
-          <p>“{part.epigraph}”</p>
-          <span>{part.epigraphNote}</span>
-        </div>
-      )}
-      <ol className="chapterList">
-        {part.chapters.map((ch, i) => (
-          <li key={ch.id}>
-            <button className="chapterRow" onClick={() => onOpenChapter(i)}>
-              <span className="chapterIndex">{i + 1}</span>
-              <span className="chapterRowTitle">{ch.heading}</span>
-              <ChevronRight size={16} />
-            </button>
-          </li>
-        ))}
-      </ol>
-    </div>
-  );
-}
-
-function ChapterScreen({ part, chapter, index, total, onPrev, onNext, onBack }) {
-  const tone = TONES[part.tone];
-  const encIndex = (parseInt((chapter.id.match(/\d+/) || ["0"])[0], 10)) % ENCOURAGEMENTS.length;
-  const encouragement = ENCOURAGEMENTS[encIndex];
-  const isFinalChapter = part.num === "III" && index === total - 1;
-
-  return (
-    <div className="chapterScreen" style={{ "--accent": tone.accent, "--accentSoft": tone.accentSoft }}>
-      <button className="backLink" onClick={onBack}><ChevronLeft size={16} /> {part.title}</button>
-      <article className="page">
-        <span className="pageEyebrow">Parte {part.num} · Capítulo {index + 1} de {total}</span>
-        <h2>{chapter.heading}</h2>
-        {chapter.paragraphs.map((p, i) => <p key={i} className="pageParagraph">{p}</p>)}
-        {chapter.checklist && <ChecklistBlock chapterId={chapter.id} items={chapter.checklist} />}
-        {chapter.prompts && (
-          <div className="promptsBlock">
-            <span className="promptsLabel">Para escribir</span>
-            {chapter.prompts.map((pr, i) => (
-              <div key={i} className="promptItem">
-                <p className="promptQuestion">{pr}</p>
-                <PromptField storageKey={`ans:${chapter.id}:${i}`} question={pr} />
-              </div>
-            ))}
-          </div>
-        )}
-        <div className="encouragementNote">
-          <Sparkles size={14} />
-          <p>{encouragement}</p>
-        </div>
-        {isFinalChapter && (
-          <div className="closingBlock">
-            <h3>{CLOSING.heading}</h3>
-            {CLOSING.paragraphs.map((p, i) => <p key={i} className="pageParagraph">{p}</p>)}
-          </div>
-        )}
-      </article>
-      <div className="chapterNav">
-        <button className="navBtn" onClick={onPrev} disabled={index === 0}><ChevronLeft size={16} /> Anterior</button>
-        <button className="navBtn primary" onClick={onNext} disabled={index === total - 1}>Siguiente <ChevronRight size={16} /></button>
-      </div>
-    </div>
-  );
-}
-
-function AffirmationsScreen({ onBack }) {
-  return (
-    <div className="simpleScreen">
-      <button className="backLink" onClick={onBack}><ChevronLeft size={16} /> Inicio</button>
-      <h2><Sparkles size={20} style={{ marginRight: 8, verticalAlign: -3 }} />Afirmaciones</h2>
-      <p className="pageParagraph">Lee despacio. Quédate con las que sientas más verdaderas hoy.</p>
-      <h3 className="groupLabel">Para el amor</h3>
-      <div className="affirmGrid">{AFFIRMATIONS.love.map((a, i) => <div key={i} className="affirmCard">{a}</div>)}</div>
-      <h3 className="groupLabel">Para el dinero y la pareja</h3>
-      <div className="affirmGrid">{AFFIRMATIONS.money.map((a, i) => <div key={i} className="affirmCard alt">{a}</div>)}</div>
-    </div>
-  );
-}
-
-function BonusNum({ index, isOpen, onToggle }) {
-  const [value] = useAnswer(`bonus-q-${index}`);
-  const answered = value && value.trim().length > 0;
-  return (
-    <button type="button" className={"bonusNum" + (answered ? " done" : "") + (isOpen ? " active" : "")} onClick={onToggle}>
-      {index + 1}
-    </button>
-  );
-}
-
-function BonusScreen({ onBack }) {
-  const [openDay, setOpenDay] = useState(null);
-  return (
-    <div className="simpleScreen">
-      <button className="backLink" onClick={onBack}><ChevronLeft size={16} /> Inicio</button>
-      <h2>30 preguntas para 30 días</h2>
-      <p className="pageParagraph">Elige un número cada día y responde sin editarlo.</p>
-      <div className="bonusGrid">
-        {BONUS_QUESTIONS.map((q, i) => (
-          <BonusNum key={i} index={i} isOpen={openDay === i} onToggle={() => setOpenDay(openDay === i ? null : i)} />
-        ))}
-      </div>
-      {openDay !== null && (
-        <div className="bonusPanel">
-          <span className="bonusPanelDay">Día {openDay + 1}</span>
-          <p className="promptQuestion">{BONUS_QUESTIONS[openDay]}</p>
-          <PromptField storageKey={`bonus-q-${openDay}`} question={BONUS_QUESTIONS[openDay]} />
-        </div>
-      )}
-    </div>
-  );
-}
-
-function NotesScreen({ onBack }) {
-  const [entries, setEntries] = useState([]);
-  const [draft, setDraft] = useState("");
-  const [loaded, setLoaded] = useState(false);
-
-  useEffect(() => {
-    (async () => {
-      const res = await storage.get("journal-entries");
-      setEntries(res ? JSON.parse(res.value) : []);
-      setLoaded(true);
-    })();
-  }, []);
-
-  const addEntry = async () => {
-    if (!draft.trim()) return;
-    const next = [{ text: draft.trim(), date: new Date().toLocaleDateString("es-ES", { day: "numeric", month: "short", year: "numeric" }) }, ...entries];
-    setEntries(next);
-    setDraft("");
-    await storage.set("journal-entries", JSON.stringify(next));
-  };
-
-  return (
-    <div className="simpleScreen">
-      <button className="backLink" onClick={onBack}><ChevronLeft size={16} /> Inicio</button>
-      <h2><NotebookPen size={20} style={{ marginRight: 8, verticalAlign: -3 }} />Mis notas libres</h2>
-      <p className="pageParagraph">Un espacio sin estructura para lo que vaya surgiendo mientras lees.</p>
-      <textarea className="promptTextarea" rows={4} placeholder="Escribe una nota…" value={draft} onChange={(e) => setDraft(e.target.value)} />
-      <button className="navBtn primary" style={{ marginTop: 10 }} onClick={addEntry}>Guardar nota</button>
-      <div className="entryList">
-        {loaded && entries.length === 0 && <p className="emptyNote">Todavía no tienes notas guardadas.</p>}
-        {entries.map((e, i) => (
-          <div key={i} className="entryCard">
-            <span className="entryDate">{e.date}</span>
-            <p>{e.text}</p>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-/* ---------------------------------------------------------------
-   PUERTA DE ACCESO (código simple, ligado a la compra)
---------------------------------------------------------------- */
-function AccessGate({ onUnlock }) {
-  const [code, setCode] = useState("");
-  const [error, setError] = useState(false);
-  const expected = import.meta.env.VITE_ACCESS_CODE;
-
-  const tryUnlock = async (e) => {
-    e.preventDefault();
-    if (!expected || code.trim().toUpperCase() === expected.trim().toUpperCase()) {
-      await storage.set("unlocked", "yes");
-      onUnlock();
-    } else {
-      setError(true);
-    }
-  };
-
-  return (
-    <div className="gateScreen">
-      <Lock size={22} strokeWidth={1.4} />
-      <h1>{APP_TITLE}</h1>
-      <p>Introduce el código de acceso que recibiste al comprar.</p>
-      <form onSubmit={tryUnlock} className="gateForm">
-        <input
-          className="gateInput"
-          value={code}
-          onChange={(e) => { setCode(e.target.value); setError(false); }}
-          placeholder="Código de acceso"
-          autoFocus
-        />
-        <button type="submit" className="navBtn primary">Entrar</button>
-      </form>
-      {error && <span className="reflectionError">Ese código no es válido. Revisa el correo de tu compra.</span>}
-    </div>
-  );
-}
-
-/* ---------------------------------------------------------------
-   APP
---------------------------------------------------------------- */
-export default function App() {
-  const [unlocked, setUnlocked] = useState(null); // null = comprobando, true/false
-  const [screen, setScreen] = useState("home");
-  const [partIndex, setPartIndex] = useState(0);
-  const [chapterIndex, setChapterIndex] = useState(0);
-
-  useEffect(() => {
-    (async () => {
-      const expected = import.meta.env.VITE_ACCESS_CODE;
-      const requireGate = !!expected;
-      if (!requireGate) { setUnlocked(true); return; }
-
-      // Si el link trae ?code=... (por ejemplo, desde la página de
-      // agradecimiento de Hotmart/Gumroad), y coincide, desbloquea sola.
-      const params = new URLSearchParams(window.location.search);
-      const codeFromUrl = params.get("code");
-      if (codeFromUrl && codeFromUrl.trim().toUpperCase() === expected.trim().toUpperCase()) {
-        await storage.set("unlocked", "yes");
-        setUnlocked(true);
-        return;
-      }
-
-      const res = await storage.get("unlocked");
-      setUnlocked(res ? res.value === "yes" : false);
-    })();
-  }, []);
-
-  if (unlocked === null) return null;
-  if (unlocked === false) return <div className="app"><div className="appFrame"><AccessGate onUnlock={() => setUnlocked(true)} /></div></div>;
-
-  const goHome = () => setScreen("home");
-  const openPart = (i) => { setPartIndex(i); setScreen("part"); };
-  const openChapter = (i) => { setChapterIndex(i); setScreen("chapter"); };
-  const part = PARTS[partIndex];
-  const chapter = part.chapters[chapterIndex];
-
-  return (
-    <div className="app">
-      <div className="appFrame">
-        {screen === "home" && <HomeScreen onNavigatePart={openPart} onNavigate={setScreen} />}
-        {screen === "part" && <PartScreen part={part} onOpenChapter={openChapter} onBack={goHome} />}
-        {screen === "chapter" && (
-          <ChapterScreen
-            part={part}
-            chapter={chapter}
-            index={chapterIndex}
-            total={part.chapters.length}
-            onPrev={() => setChapterIndex((c) => Math.max(0, c - 1))}
-            onNext={() => setChapterIndex((c) => Math.min(part.chapters.length - 1, c + 1))}
-            onBack={() => setScreen("part")}
-          />
-        )}
-        {screen === "affirmations" && <AffirmationsScreen onBack={goHome} />}
-        {screen === "bonus" && <BonusScreen onBack={goHome} />}
-        {screen === "notes" && <NotesScreen onBack={goHome} />}
-      </div>
-    </div>
-  );
-}
+export { APP_TITLE, APP_SUBTITLE, PARTS, AFFIRMATIONS, BONUS_QUESTIONS, ENCOURAGEMENTS, CLOSING };
