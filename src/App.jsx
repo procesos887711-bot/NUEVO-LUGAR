@@ -32,9 +32,9 @@ const storage = {
    TOKENS
 --------------------------------------------------------------- */
 const TONES = {
-  moss: { accent: "#57603F", accentSoft: "#E4E6D6" },
-  ochre: { accent: "#A66A22", accentSoft: "#F0E1C6" },
-  rose: { accent: "#8C4E4E", accentSoft: "#EBDAD5" },
+  moss: { accent: "#8B3FA8", accentSoft: "#EDDCF7" },   // Parte I — orquídea vibrante
+  ochre: { accent: "#C9982E", accentSoft: "#F8EACB" },  // Parte II — dorado
+  rose: { accent: "#6A3FA0", accentSoft: "#E4D9F5" },   // Parte III — violeta profundo
 };
 
 /* ---------------------------------------------------------------
@@ -455,8 +455,20 @@ export default function App() {
 
   useEffect(() => {
     (async () => {
-      const requireGate = !!import.meta.env.VITE_ACCESS_CODE;
+      const expected = import.meta.env.VITE_ACCESS_CODE;
+      const requireGate = !!expected;
       if (!requireGate) { setUnlocked(true); return; }
+
+      // Si el link trae ?code=... (por ejemplo, desde la página de
+      // agradecimiento de Hotmart/Gumroad), y coincide, desbloquea sola.
+      const params = new URLSearchParams(window.location.search);
+      const codeFromUrl = params.get("code");
+      if (codeFromUrl && codeFromUrl.trim().toUpperCase() === expected.trim().toUpperCase()) {
+        await storage.set("unlocked", "yes");
+        setUnlocked(true);
+        return;
+      }
+
       const res = await storage.get("unlocked");
       setUnlocked(res ? res.value === "yes" : false);
     })();
