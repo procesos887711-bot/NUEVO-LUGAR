@@ -279,4 +279,27 @@ const BONUS_QUESTIONS = [
   "¿Cómo quiero escribir mi propia historia a partir de ahora?"
 ];
 
-export { APP_TITLE, APP_SUBTITLE, PARTS, AFFIRMATIONS, BONUS_QUESTIONS };
+const ENCOURAGEMENTS = [
+  "Estás dedicando tiempo a mirar tu propia historia. Eso, por sencillo que parezca, ya es un acto de valentía.",
+  "No hace falta que resuelvas todo hoy. Cada vez que vuelves aquí, algo se acomoda un poco, aunque no lo notes de inmediato.",
+  "Lo que acabas de leer puede sentarse contigo unos días. No hay prisa: tu proceso no se mide en capítulos por semana.",
+  "Si esto removió algo incómodo, es una buena señal: significa que tocaste algo real, no que hiciste algo mal.",
+  "Volver a este espacio, aunque sea cinco minutos, ya cuenta. La constancia pequeña sostiene más que el esfuerzo intenso y esporádico.",
+  "Estás construyendo una relación distinta con tu propia historia, una lectura a la vez. Eso no se deshace fácilmente.",
+  "Puedes cerrar la app ahora mismo y sentirte orgullosa de haber llegado hasta aquí hoy.",
+  "Nadie más está viendo esto. Es tuyo, a tu ritmo, sin nadie esperando que 'ya deberías haber avanzado más'.",
+  "Cada palabra que escribiste hoy es un paso que tu yo de hace un año no sabía que podía dar.",
+  "Esto no es una carrera hacia una versión 'arreglada' de ti. Es un acompañamiento mientras te conoces mejor."
+];
+
+const CLOSING = {
+  heading: "Has llegado hasta aquí",
+  paragraphs: [
+    "No fue poca cosa. Leíste, escribiste, te detuviste en preguntas que muchas personas evitan toda su vida. Eso ya cambió algo, aunque los resultados no se vean de inmediato.",
+    "Este cuaderno no se termina hoy: puedes volver cuando quieras, releer un capítulo que te movió algo, completar una pregunta que dejaste a medias, o simplemente escribir en tus notas libres cuando algo de tu día se conecte con algo de aquí.",
+    "Las 30 preguntas te esperan para los días en que quieras seguir mirando hacia adentro sin necesidad de releer todo. Y las afirmaciones, para los días en que solo necesites un recordatorio amable.",
+    "Gracias por confiar en este proceso y en ti misma para sostenerlo. Eso es, quizás, el primer paso que ya nadie te puede quitar."
+  ]
+};
+
+export { APP_TITLE, APP_SUBTITLE, PARTS, AFFIRMATIONS, BONUS_QUESTIONS, ENCOURAGEMENTS, CLOSING };
